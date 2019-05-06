@@ -38,7 +38,8 @@ Currently following adb commands are **not supported**:
 
 ### What's TODO?
 
-* Add adapters to provide more easy-to-use functions, e.g.
+* Add `with` context manager
+* Add adapters to provide more easy-to-use functions (see [here](http://gogs.njuics.cn/android/anip/src/master/src/anip/emu.py)), e.g.
     * save/load snapshot (e.g., sdk version)
     * ...
 

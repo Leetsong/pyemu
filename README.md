@@ -29,7 +29,6 @@ Currently following adb commands are **not supported**:
 * geo
 * event
 * power
-* network
 * gsm
 * cdma
 * sensor
@@ -64,6 +63,9 @@ try:
     print('>> [{}]\n{}\n'.format(retc, result))
 
     retc, result = emu.avd('snapshot', 'list')
+    print('>> [{}]\n{}\n'.format(retc, result))
+
+    retc, result = emu.network('delay', AndroidEmuNetworkDelay.customize(1000, 2000))
     print('>> [{}]\n{}\n'.format(retc, result))
 except Exception as e:
     print(e)

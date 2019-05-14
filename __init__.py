@@ -8,6 +8,7 @@ from typing import List, Optional
 class AndroidEmuCommand:
     AUTH = 'auth'
     AVD = 'avd'
+    NETWORK = 'network'
 
 
 class AndroidEmuException(Exception):
@@ -16,8 +17,72 @@ class AndroidEmuException(Exception):
         super().__init__(message)
 
 
-class AndroidEmu:
+class AndroidEmuNetworkDelay:
 
+    @staticmethod
+    def none(): return 'none'
+
+    @staticmethod
+    def umts(): return 'umts'
+
+    @staticmethod
+    def edge(): return 'edge'
+
+    @staticmethod
+    def gprs(): return 'gprs'
+
+    @staticmethod
+    def customize(l, h):
+        """
+        customize latency, in milliseconds
+        :param l: the lowest delay
+        :param h: the highest delay
+        :return:
+        """
+        return 'l h'
+
+
+class AndroidEmuNetworkSpeed:
+
+    @staticmethod
+    def gsm(): return 'gsm'
+
+    @staticmethod
+    def hscsd(): return 'hscsd'
+
+    @staticmethod
+    def gprs(): return 'gprs'
+
+    @staticmethod
+    def edge(): return 'edge'
+
+    @staticmethod
+    def umts(): return 'umts'
+
+    @staticmethod
+    def hsdpa(): return 'hsdpa'
+
+    @staticmethod
+    def lte(): return 'lte'
+
+    @staticmethod
+    def evdo(): return 'evdo'
+
+    @staticmethod
+    def full(): return 'full'
+
+    @staticmethod
+    def customize(l, h):
+        """
+        customized speed, in kb/s
+        :param l: the lowest speed
+        :param h: the highest speed
+        :return:
+        """
+        return 'l h'
+
+
+class AndroidEmu:
     RET_OK = re.compile(b'.*?OK\r\n$')
     RET_KO = re.compile(b'.*?KO: .*?$')
 
@@ -63,17 +128,45 @@ class AndroidEmu:
         return self
 
     def auth(self, auth_path: Path):
+        """
+        Authentication using a token
+        :param auth_path: auth token path
+        :return: return of _exec_command
+        """
         with auth_path.open(mode='r', encoding='utf-8') as f:
             token = f.read()
         emu_command = [AndroidEmuCommand.AUTH, token.strip(' \t\r\n')]
         return self._exec_command(emu_command)
 
-    def avd(self, command: str, args):
-        emu_command = [AndroidEmuCommand.AVD, command]
+    def avd(self, subcommand: str, args):
+        """
+        avd commands provides avd management functionality
+        :param subcommand: subcommand
+        :param args: subcommand arguments
+        :return: return of _exec_command
+        """
+        emu_command = [AndroidEmuCommand.AVD, subcommand]
+        emu_command.extend(shlex.split(args))
+        return self._exec_command(emu_command)
+
+    def network(self, subcommand: str, args):
+        """
+        network commands provides network management functionality: delay, latency, ...
+        :param subcommand: subcommand
+        :param args: subcommand arguments
+        :return: return of _exec_command
+        """
+        emu_command = [AndroidEmuCommand.NETWORK, subcommand]
         emu_command.extend(shlex.split(args))
         return self._exec_command(emu_command)
 
     def _exec_command(self, emu_cmd: List[str], timeout=10):
+        """
+        Execute an emulator command
+        :param emu_cmd: command in list
+        :param timeout: timeout to execute this command
+        :return: returncode, output
+        """
         if self._client is None:
             raise AndroidEmuException('AndroidEmu is not by far opened')
 
@@ -115,6 +208,9 @@ if __name__ == '__main__':
         print('>> [{}]\n{}\n'.format(retc, result))
 
         retc, result = emu.avd('snapshot', 'list')
+        print('>> [{}]\n{}\n'.format(retc, result))
+
+        retc, result = emu.network('delay', AndroidEmuNetworkDelay.customize(1000, 2000))
         print('>> [{}]\n{}\n'.format(retc, result))
     except Exception as e:
         print(e)

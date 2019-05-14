@@ -89,14 +89,9 @@ class AndroidEmu:
     def __init__(self, log_command: bool = True, log_output: bool = True):
         self._is_log_command_enabled = log_command
         self._is_log_output_enabled = log_output
-        self._host = None
-        self._port = None
         self._client = None
 
     def open(self, host='localhost', port=5554):
-        self._host = host
-        self._port = port
-
         if self._is_log_command_enabled:
             print('-> open {}:{}'.format(host, port))
 
